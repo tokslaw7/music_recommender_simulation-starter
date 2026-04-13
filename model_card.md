@@ -109,3 +109,5 @@ Prompts:
 - What you learned about recommender systems  
 - Something unexpected or interesting you discovered  
 - How this changed the way you think about music recommendation apps  
+
+My biggest learning moment was realizing that recommendation systems do not need to be overly complex to produce results that feel personal. Building this project showed me how a few weighted features, like genre, mood, and energy, can already create suggestions that seem "right" to a listener. Copilot helped me move faster by clarifying logic, suggesting cleaner code structure, and helping me debug edge cases so I could focus on understanding the system design. What surprised me most was how even a simple scoring algorithm could still feel like a real recommender, which changed how I think about the balance between model complexity and user experience.
