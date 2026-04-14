@@ -23,12 +23,63 @@ Some prompts to answer:
 
 - What features does each `Song` use in your system
   - For example: genre, mood, energy, tempo
+    - The features used are Genre for matching , mood for user's preference and energy for user's context
 - What information does your `UserProfile` store
+    - stores user's preferences
 - How does your `Recommender` compute a score for each song
+    - It computes score using user's preferred genre, mood and energy closeness and then ranks by total score.        
 - How do you choose which songs to recommend
-
+    - Recommended songs based on  user profile that is with closest match to user preferences.
 You can include a simple diagram or bullet list if helpful.
 
+```mermaid
+flowchart LR
+    A[CSV File: songs.csv\nAll Song Rows] --> B[Load Songs\nParse each row into song attributes]
+    U[Input: User Prefs\nGenre, Mood, Energy, Tempo, etc.] --> C
+    B --> C{The Loop\nFor each song in CSV}
+
+    C --> D[Compute Feature Scores\nGenre match\nMood match\nEnergy similarity\nTempo/Valence/Danceability/Acousticness similarity]
+    D --> E[Apply Weighted Scoring Logic\nCombine into one total score]
+    E --> F[Attach score to that song]
+    F --> C
+
+    C -->|After all songs scored| G[Sort Songs by score descending]
+    G --> H[Output: Top K Recommendations\nRanked list + explanations]
+```
+
+### Finalized Algorithm Recipe
+
+1. Load the song catalog from `data/songs.csv`.
+2. Read user preferences (genre, mood, target energy, target tempo, target valence, target danceability, target acousticness).
+3. For each song, compute feature-level scores:
+    - Genre match: 1 if exact match, else 0
+    - Mood match: 1 if exact match, else 0
+    - Energy similarity: closeness to target energy in [0, 1]
+    - Tempo similarity: closeness to preferred tempo in [0, 1]
+    - Valence similarity: closeness to target valence in [0, 1]
+    - Danceability similarity: closeness to target danceability in [0, 1]
+    - Acousticness similarity: closeness to preferred acousticness in [0, 1]
+4. Combine feature scores with weighted scoring:
+    - 0.35 * genre + 0.25 * mood + 0.20 * energy + 0.08 * tempo + 0.05 * valence + 0.04 * danceability + 0.03 * acousticness
+5. Save the song with its total score and explanation tags.
+6. Sort all songs by score (highest first).
+7. Return the top K songs as recommendations.
+
+### Brief Note on Potential Biases
+
+- Genre over-prioritization: Because genre has the highest weight (0.35), the system can rank a genre match above a song that better matches the user's current mood and listening context.
+- Exact-match rigidity: Genre and mood are binary matches (1 or 0), so near-neighbor genres or related moods are not rewarded.
+- Small-catalog bias: With only a small song set, the system may repeatedly push the same songs and underrepresent variety.
+- Feature omission bias: The recommender ignores lyrics, language, culture, and novelty, so songs that users might love for those reasons can be missed.
+
+
+---
+
+## CLI Verification
+![CLI Verification](images/cli.png)
+
+### Stress Test with Diverse Profile
+![Diverse Profile](images/Diverse_profile.png)
 ---
 
 ## Getting Started
@@ -63,6 +114,50 @@ pytest
 ```
 
 You can add more tests in `tests/test_recommender.py`.
+
+---
+
+## Demo Profiles and Expected Top 3
+
+The examples below use the current scoring logic in `src/recommender.py` with weighted similarity across genre, mood, energy, tempo, valence, danceability, and acousticness.
+
+### Vibe A: Intense Rock
+
+Sample user preferences:
+
+- genre: rock
+- mood: intense
+- energy: 0.92
+- tempo_bpm: 145
+- valence: 0.50
+- danceability: 0.62
+- acousticness: 0.10
+- likes_acoustic: false
+
+Expected top 3 songs:
+
+1. Storm Runner
+2. Gym Hero
+3. Steel Pulse Theory
+
+### Vibe B: Chill Lofi
+
+Sample user preferences:
+
+- genre: lofi
+- mood: chill
+- energy: 0.38
+- tempo_bpm: 78
+- valence: 0.58
+- danceability: 0.60
+- acousticness: 0.80
+- likes_acoustic: true
+
+Expected top 3 songs:
+
+1. Midnight Coding
+2. Library Rain
+3. Focus Flow
 
 ---
 
@@ -208,4 +303,6 @@ A few sentences about what you learned:
 - What surprised you about how your system behaved
 - How did building this change how you think about real music recommenders
 - Where do you think human judgment still matters, even if the model seems "smart"
+
+
 

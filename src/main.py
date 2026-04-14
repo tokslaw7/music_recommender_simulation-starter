@@ -9,14 +9,21 @@ You will implement the functions in recommender.py:
 - recommend_songs
 """
 
-from recommender import load_songs, recommend_songs
+from pathlib import Path
+
+from .recommender import load_songs, recommend_songs
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def main() -> None:
-    songs = load_songs("data/songs.csv") 
+    songs = load_songs(str(BASE_DIR / "data" / "songs.csv"))
 
     # Starter example profile
     user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
+
+    user_prefs = {"genre": "High-Energy Pop", "mood": "Chill Lofi", "energy": 0.8}
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
 
